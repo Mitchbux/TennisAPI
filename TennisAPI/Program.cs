@@ -14,8 +14,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddOpenApi();
 
 var conf = builder.Configuration;
-
-var options = conf.Get<TennisAPI.Options>() ?? throw new InvalidOperationException("La section options n'est pas présente dans le fichier appsettings.json.");
+var options = builder.Configuration.GetSection("Options").Get<Options>() ?? throw new InvalidOperationException("La section options n'est pas présente dans le fichier appsettings.json.");
 if (options.UseDataBase.HasValue && options.UseDataBase.Value)
 {
     try

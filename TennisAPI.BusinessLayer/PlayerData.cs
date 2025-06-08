@@ -13,6 +13,7 @@ namespace TennisAPI.BusinessLayer
         public int height { get; set; }
         public int weight { get; set; }
         public int rank { get; set; }
+        public int points { get; set; }
         public IEnumerable<int> last { get; set; } = new List<int>();
 
         public double WeightRatio()

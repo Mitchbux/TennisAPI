@@ -1,4 +1,5 @@
-﻿using TennisAPI.DataLayer;
+﻿using System.Data;
+using TennisAPI.DataLayer;
 
 namespace TennisAPI.BusinessLayer
 {
@@ -28,13 +29,40 @@ namespace TennisAPI.BusinessLayer
             }
             else
             {
-                var playerTable = _dataLayer.Query("SELECT * FROM PLAYERS WHERE ID=@ID");
-                var playerDataTable = _dataLayer.Query("SELECT * FROM PLAYER_DATA WHERE PLAYER_ID=@ID");
-                var countryTable = _dataLayer.Query("SELECT * FROM COUNTRIES WHERE ID=@COUNTRYID");
-                var playerResultTable = _dataLayer.Query("SELECT  * FROM PLAYER_RESULTS WHERE PLAYER_ID=@ID");
                 var player = new Player();
+                var playerTable = _dataLayer.Query("SELECT * FROM PLAYERS WHERE ID=@ID", new P("ID",id));
+                var countryId = 0;
+                if (playerTable.Rows.Count == 0)
+                {
+                    return null; // Aucun joueur trouvé avec cet ID
+                }else
+                {
+                    player.id = Convert.ToInt32(playerTable.Rows[0]["ID"]);
+                    player.firstname = playerTable.Rows[0]["FIRSTNAME"]?.ToString() ?? string.Empty;
+                    player.lastname = playerTable.Rows[0]["LASTNAME"]?.ToString() ?? string.Empty;
+                    player.shortname = playerTable.Rows[0]["SHORTNAME"]?.ToString() ?? string.Empty;
+                    player.sex = playerTable.Rows[0]["SEX"]?.ToString() ?? string.Empty;
+                    player.picture = playerTable.Rows[0]["PICTURE"]?.ToString() ?? string.Empty;
+                    countryId = Convert.ToInt32(playerTable.Rows[0]["COUNTRY_ID"]);
+                }
+                var playerDataTable = _dataLayer.Query("SELECT * FROM PLAYER_DATA WHERE PLAYER_ID=@ID", new P("ID", id));
                 player.data = new PlayerData();
+                if(playerDataTable.Rows.Count > 0)
+                {
+                    player.data.age = Convert.ToInt32(playerDataTable.Rows[0]["AGE"]);
+                    player.data.rank = Convert.ToInt32(playerDataTable.Rows[0]["RANK"]);
+                    player.data.height = Convert.ToInt32(playerDataTable.Rows[0]["HEIGHT"]);
+                    player.data.weight = Convert.ToInt32(playerDataTable.Rows[0]["WEIGHT"]);
+                    player.data.points = Convert.ToInt32(playerDataTable.Rows[0]["POINTS"]);
+                }
+                var countryTable = _dataLayer.Query("SELECT * FROM COUNTRIES WHERE ID=@COUNTRYID", new P("COUNTRYID", countryId));
                 player.country = new Country();
+                if(countryTable.Rows.Count > 0)
+                {
+                    player.country.code = countryTable.Rows[0]["CODE"]?.ToString() ?? string.Empty; 
+                    player.country.picture = countryTable.Rows[0]["PICTURE"]?.ToString() ?? string.Empty;
+                }
+                var playerResultTable = _dataLayer.Query("SELECT  * FROM LAST_RESULTS WHERE PLAYER_ID=@ID", new P("ID", id));
                 foreach (var row in playerResultTable.Rows)
                 {
                     var data = (row as IDictionary<string, object>);
@@ -77,11 +105,15 @@ namespace TennisAPI.BusinessLayer
                 {
                     foreach (var row in playerIdsTable.Rows)
                     {
-                        var data = (row as IDictionary<string, object>);
-                        if (data != null && data.ContainsKey("ID"))
-                        {
-                            var playerId = Convert.ToInt32(data["ID"]);
-                            yield return GetById(playerId);
+                        var data = row as DataRow;
+                        if(data != null)
+                        { 
+                            var playerId = Convert.ToInt32(data?.ItemArray[0]);
+                            var player = GetById(playerId);
+                            if(player != null)
+                            {
+                                yield return player;
+                            }
                         }
                     }
                 }
