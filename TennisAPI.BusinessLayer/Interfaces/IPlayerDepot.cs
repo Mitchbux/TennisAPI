@@ -10,5 +10,6 @@ namespace TennisAPI.BusinessLayer
     {
         public IEnumerable<Player> GetAll();    
         public Player? GetById(int id);
+        public Statistics GetStatistics();
     }
 }

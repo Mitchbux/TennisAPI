@@ -19,10 +19,11 @@ namespace TennisAPI.BusinessLayer
                 var filename = "players.json";
                 var json = File.ReadAllText(filename);
                 var players = System.Text.Json.JsonSerializer.Deserialize<PlayersList>(json);
-                if(players == null || players.players == null || players.players?.Count == 0)
+                if (players == null || players.players == null || players.players?.Count == 0)
                 {
                     throw new InvalidOperationException($"Impossible de lire le fichier json {filename}");
-                }else
+                }
+                else
                     return players?.players?.Find(p => p.id == id);
             }
             else
@@ -49,7 +50,7 @@ namespace TennisAPI.BusinessLayer
         }
         public IEnumerable<Player> GetAll()
         {
-            if(_dataLayer == null)
+            if (_dataLayer == null)
             {
                 var filename = "players.json";
                 var json = File.ReadAllText(filename);
@@ -84,6 +85,28 @@ namespace TennisAPI.BusinessLayer
                         }
                     }
                 }
+            }
+        }
+        public Statistics GetStatistics()
+        {
+            if (_dataLayer == null)
+            {
+                var stats = new Statistics();
+                var players = GetAll().ToList();
+                stats.MeanWeightRatio = players.Average(p => p.data.WeightRatio());
+                stats.MeanHeight = players.OrderBy(p => p.data.height).ToArray()[(players.Count - 1) / 2].data.height;
+                return stats;
+            }else
+            {
+                var stats = new Statistics();
+                var statisticsTable = _dataLayer.Query("EXEC PlayerStats()");
+                if(statisticsTable != null && statisticsTable.Rows.Count == 1)
+                {
+                    stats.CountryWithMostWins = statisticsTable.Rows[0]["CountryWithMostWins"]?.ToString();
+                    stats.MeanWeightRatio = Convert.ToDouble(statisticsTable.Rows[0]["MeanWeightRatio"]);
+                    stats.MeanHeight = Convert.ToDouble(statisticsTable.Rows[0]["MeanHeight"]);
+                }
+                return stats;
             }
         }
     }

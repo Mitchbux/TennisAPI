@@ -15,5 +15,18 @@ namespace TennisAPI.BusinessLayer
         public int rank { get; set; }
         public IEnumerable<int> last { get; set; } = new List<int>();
 
+        public double WeightRatio()
+        {
+            if (height <= 0)
+            {
+                return 0.0;
+            }
+            if(weight <= 0)
+            {
+                return 0.0;
+            }
+            return (weight/1000) / ((height/100.0)*(height/100.0));
+        }
+
     }
 }

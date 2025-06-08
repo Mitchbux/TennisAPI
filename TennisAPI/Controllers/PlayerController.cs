@@ -62,5 +62,20 @@ namespace TennisAPI.Controllers
             }
                 
         }
+        [HttpGet]
+        [Route("Statistics")]
+        public IActionResult Statistics()
+        {
+           try
+            {
+                var stats = _playerDepot.GetStatistics();
+                return Ok(stats);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Une erreur s'est produite lors de la récupération des statistiques des joueurs.");
+                return StatusCode(500, new { Message = "Une erreur s'est produite lors de la récupération des statistiques des joueurs." });
+            }
+        }
     }
 }
