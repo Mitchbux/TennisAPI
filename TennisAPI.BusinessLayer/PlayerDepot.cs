@@ -30,7 +30,8 @@ namespace TennisAPI.BusinessLayer
             else
             {
                 var player = new Player();
-                var playerTable = _dataLayer.Query("SELECT * FROM PLAYERS WHERE ID=@ID", new P("ID",id));
+                var playerTable = _dataLayer.Query("SELECT * FROM PLAYERS WHERE ID=@ID",
+                    new KeyValuePair<string, object>("ID", id));
                 var countryId = 0;
                 if (playerTable.Rows.Count == 0)
                 {
@@ -45,7 +46,8 @@ namespace TennisAPI.BusinessLayer
                     player.picture = playerTable.Rows[0]["PICTURE"]?.ToString() ?? string.Empty;
                     countryId = Convert.ToInt32(playerTable.Rows[0]["COUNTRY_ID"]);
                 }
-                var playerDataTable = _dataLayer.Query("SELECT * FROM PLAYER_DATA WHERE PLAYER_ID=@ID", new P("ID", id));
+                var playerDataTable = _dataLayer.Query("SELECT * FROM PLAYER_DATA WHERE PLAYER_ID=@ID",
+                    new KeyValuePair<string, object>("ID", id));
                 player.data = new PlayerData();
                 if(playerDataTable.Rows.Count > 0)
                 {
@@ -55,14 +57,16 @@ namespace TennisAPI.BusinessLayer
                     player.data.weight = Convert.ToInt32(playerDataTable.Rows[0]["WEIGHT"]);
                     player.data.points = Convert.ToInt32(playerDataTable.Rows[0]["POINTS"]);
                 }
-                var countryTable = _dataLayer.Query("SELECT * FROM COUNTRIES WHERE ID=@COUNTRYID", new P("COUNTRYID", countryId));
+                var countryTable = _dataLayer.Query("SELECT * FROM COUNTRIES WHERE ID=@COUNTRYID",
+                    new KeyValuePair<string, object>("COUNTRYID", countryId));
                 player.country = new Country();
                 if(countryTable.Rows.Count > 0)
                 {
                     player.country.code = countryTable.Rows[0]["CODE"]?.ToString() ?? string.Empty; 
                     player.country.picture = countryTable.Rows[0]["PICTURE"]?.ToString() ?? string.Empty;
                 }
-                var playerResultTable = _dataLayer.Query("SELECT  * FROM LAST_RESULTS WHERE PLAYER_ID=@ID", new P("ID", id));
+                var playerResultTable = _dataLayer.Query("SELECT  * FROM LAST_RESULTS WHERE PLAYER_ID=@ID",
+                    new KeyValuePair<string, object>("ID", id));
                 foreach (var row in playerResultTable.Rows)
                 {
                     var data = (row as IDictionary<string, object>);
@@ -125,17 +129,22 @@ namespace TennisAPI.BusinessLayer
             {
                 var stats = new Statistics();
                 var players = GetAll().ToList();
-                var countriesWithWins = players.GroupBy(p => p.country.code)
-                                            .Select(g => new { Country = g.Key, Wins = g.Sum(p => p.data.last.Count(r => r == 1)), Total = g.Sum(p => p.data.last.Count()) })
-                                            .OrderByDescending(g => g.Wins / g.Total);
+                var countriesWithWins = players.GroupBy(p => p.country?.code)
+                                            .Select(g => new { Country = g.Key,
+                                                Wins = g.Sum(p => p.data?.last.Count(r => r == 1)),
+                                                Total = g.Sum(p => p.data?.last.Count()) })
+                                            .OrderByDescending(g => (g.Wins.HasValue && g.Total.HasValue)
+                                                ? (double)g.Wins.Value / (double)g.Total.Value : 0.0 );
                 stats.CountryWithMostWins = countriesWithWins.FirstOrDefault()?.Country ?? "N/A";
-                stats.MeanWeightRatio = players.Average(p => p.data.WeightRatio());
-                stats.MedianeHeight = players.OrderBy(p => p.data.height).ToArray()[(players.Count - 1) / 2].data.height;
+                stats.MeanWeightRatio = players.Average(p => p.data?.WeightRatio());
+                stats.MedianeHeight = players.OrderBy(p => p.data?.height).ToArray()[(players.Count - 1) / 2].data?.height;
                 return stats;
             }else
             {
                 var stats = new Statistics();
-                var statisticsTable = _dataLayer.Query("EXEC PlayerStats()");
+                var statisticsTable = _dataLayer.Query("SELECT CountryFirst() as CountryWithMostWins, " +
+                                                        "MeanWeightRatio() as MeanWeightRatio," +
+                                                        "MedianeHeight() as MedianeHeight");
                 if(statisticsTable != null && statisticsTable.Rows.Count == 1)
                 {
                     stats.CountryWithMostWins = statisticsTable.Rows[0]["CountryWithMostWins"]?.ToString();

@@ -29,6 +29,7 @@ namespace TennisAPI.Tests
             var firstPlayer = playersList?.FirstOrDefault();
             Assert.IsTrue(firstPlayer?.data?.rank == 1, "Le premier joueur de la liste doit avoir un rang égal à 1.");
         }
+
         [TestMethod]
         public void TestGetById()
         {
@@ -43,6 +44,7 @@ namespace TennisAPI.Tests
             var playerData = playerResponse?.Value as Player;
             Assert.IsTrue(playerData?.id == 52, "Le joueur retourné doit avoir un ID égal à 52.");
         }
+
         [TestMethod]
         public void TestGetByIdNotFound()
         {

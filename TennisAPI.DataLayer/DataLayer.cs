@@ -15,7 +15,7 @@ namespace TennisAPI.DataLayer
         {
             ConnectionString = _connection ?? throw new ArgumentNullException(nameof(_connection), "La chaîne de connexion ne peut pas être null.");
         }
-        public DataTable Query(string sql, params P[]? commandParams)
+        public DataTable Query(string sql, params KeyValuePair<string, object>[]? commandParams)
         {
             var data = new DataTable();
             using (var cnx = new Npgsql.NpgsqlConnection(ConnectionString))
@@ -24,10 +24,12 @@ namespace TennisAPI.DataLayer
                 var command = new NpgsqlDataAdapter(sql, cnx);
                 var parameters = command?.SelectCommand?.Parameters;
                 if (parameters != null)
-                    foreach (var param in commandParams ?? Array.Empty<P>())
+                {
+                    foreach (var param in commandParams ?? Array.Empty<KeyValuePair<string, object>>())
                     {
                         parameters.AddWithValue(param.Key, param.Value ?? DBNull.Value);
                     }
+                }
                 if (command != null)
                 {
                     command.Fill(data);
