@@ -67,6 +67,7 @@ namespace TennisAPI.Tests
             var statsResponse = stats as Microsoft.AspNetCore.Mvc.OkObjectResult;
             Assert.IsTrue(statsResponse?.Value is Statistics, "La valeur de la réponse doit être une statistique de joueurs.");
             var statsData = statsResponse?.Value as Statistics;
+            Assert.IsTrue(statsData?.CountryWithMostWins == "SRB", "Le pays avec le plus grand ratio de victoires est erronné.");
             Assert.IsTrue(statsData?.MeanWeightRatio == 23.357838995505837, "La valeur de la moyenne des IMC est erronée");
             Assert.IsTrue(statsData?.MedianeHeight == 185, "La valeur de la medianne des tailles des joueurs est erronée");
         }

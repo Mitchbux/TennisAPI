@@ -93,8 +93,12 @@ namespace TennisAPI.BusinessLayer
             {
                 var stats = new Statistics();
                 var players = GetAll().ToList();
+                var countriesWithWins = players.GroupBy(p => p.country.code)
+                                            .Select(g => new { Country = g.Key, Wins = g.Sum(p => p.data.last.Count(r => r == 1)), Total = g.Sum(p => p.data.last.Count()) })
+                                            .OrderByDescending(g => g.Wins / g.Total);
+                stats.CountryWithMostWins = countriesWithWins.FirstOrDefault()?.Country ?? "N/A";
                 stats.MeanWeightRatio = players.Average(p => p.data.WeightRatio());
-                stats.MeanHeight = players.OrderBy(p => p.data.height).ToArray()[(players.Count - 1) / 2].data.height;
+                stats.MedianeHeight = players.OrderBy(p => p.data.height).ToArray()[(players.Count - 1) / 2].data.height;
                 return stats;
             }else
             {
@@ -104,7 +108,7 @@ namespace TennisAPI.BusinessLayer
                 {
                     stats.CountryWithMostWins = statisticsTable.Rows[0]["CountryWithMostWins"]?.ToString();
                     stats.MeanWeightRatio = Convert.ToDouble(statisticsTable.Rows[0]["MeanWeightRatio"]);
-                    stats.MeanHeight = Convert.ToDouble(statisticsTable.Rows[0]["MeanHeight"]);
+                    stats.MedianeHeight = Convert.ToDouble(statisticsTable.Rows[0]["MedianeHeight"]);
                 }
                 return stats;
             }
