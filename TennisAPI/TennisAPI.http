@@ -1,0 +1,6 @@
+@TennisAPI_HostAddress = http://localhost:5120
+
+GET {{TennisAPI_HostAddress}}/player/all
+Accept: application/json
+
+###
