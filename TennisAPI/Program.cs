@@ -11,8 +11,6 @@ builder.Services.AddControllers();
 
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddOpenApi();
-
 var conf = builder.Configuration;
 var options = builder.Configuration.GetSection("Options").Get<Options>() ?? throw new InvalidOperationException("La section options n'est pas présente dans le fichier appsettings.json.");
 if (options.UseDataBase.HasValue && options.UseDataBase.Value)
@@ -45,8 +43,6 @@ else
 }
 
 var app = builder.Build();
-
-    app.MapOpenApi();
 
 app.UseSwagger();
 app.UseSwaggerUI();
