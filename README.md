@@ -1,10 +1,10 @@
 # Pour installer la base de donnée
 
-Créer une base de donnée PostgreSQL tennisapi
-Lancer le script de creation DataLayerCreate.sql
-N'oubliez pas de renseigner les identifiants dans le connectionString : user-id et password
+<p>Créer une base de donnée PostgreSQL tennisapi<br/>
+Lancer le script de creation **DataLayer/Create.sql**<br/>
+N'oubliez pas de renseigner les identifiants dans le connectionString : user-id et password</p>
 
-# Si vous ne souhbaitez pas utiliser postgre 
+# Si vous ne souhaitez pas utiliser PostGreSQL
 
 Définissez **UseDatabase : false** dans appsettings.json au niveau de la section **Options**
 
